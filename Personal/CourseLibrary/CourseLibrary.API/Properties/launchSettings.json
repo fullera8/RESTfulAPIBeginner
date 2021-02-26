@@ -11,10 +11,10 @@
   "profiles": {
     "IIS Express": {
       "commandName": "Project",
-      "launchUrl": "weatherforecast",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development"
       },
+      "sqlDebugging": true,
       "applicationUrl": "http://localhost:51044"
     },
     "CourseLibrary.API": {
