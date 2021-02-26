@@ -41,13 +41,13 @@ namespace CourseLibrary.API
                 app.UseDeveloperExceptionPage();
             }
 
-            app.UseRouting();
+            app.UseRouting(); //Allows use of URI navigation, essential for most web apps
 
             app.UseAuthorization();
 
             app.UseEndpoints(endpoints =>
             {
-                endpoints.MapControllers();
+                endpoints.MapControllers();//maps to the middleware API controller tags eg. [HttpGet()]
             });
         }
     }
