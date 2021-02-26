@@ -23,7 +23,7 @@ namespace CourseLibrary.API.Controllers
         /// <summary>
         /// Get all authors
         /// </summary>
-        /// <returns>Complete author list in header Accept format</returns>
+        /// <returns>Complete author list in Accept header format</returns>
         [HttpGet()]
         public IActionResult GetAutors()
         {
@@ -35,7 +35,7 @@ namespace CourseLibrary.API.Controllers
         /// Get single auto
         /// </summary>
         /// <param name="authorId">Author Guid ID</param>
-        /// <returns>Author in header Accept format</returns>
+        /// <returns>Author in Accept header format</returns>
         [HttpGet("{authorId:guid}")]//{ is the dynamic tag, name in the tag is var name, : is var strong typing
         public IActionResult GetAuthor(Guid authorId)//call var name in the tag, must be exact match
         {
