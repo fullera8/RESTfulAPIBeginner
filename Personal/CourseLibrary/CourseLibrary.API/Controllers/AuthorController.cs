@@ -1,4 +1,7 @@
-﻿using CourseLibrary.API.Services;
+﻿using AutoMapper;
+using CourseLibrary.API.Helpers;
+using CourseLibrary.API.Models;
+using CourseLibrary.API.Services;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
@@ -13,11 +16,14 @@ namespace CourseLibrary.API.Controllers
     public class AuthorController : ControllerBase
     {
         private readonly ICourseLibraryRepository courseLibraryRepository;
+        private readonly IMapper mapper;
 
-        public AuthorController(ICourseLibraryRepository courseLibraryRepository)
+        public AuthorController(ICourseLibraryRepository courseLibraryRepository, IMapper mapper)
         {
             this.courseLibraryRepository = courseLibraryRepository ??
                 throw new ArgumentNullException(nameof(courseLibraryRepository));
+            this.mapper = mapper ??
+                throw new ArgumentNullException(nameof(mapper));
         }
 
         /// <summary>
@@ -25,10 +31,24 @@ namespace CourseLibrary.API.Controllers
         /// </summary>
         /// <returns>Complete author list in Accept header format</returns>
         [HttpGet()]
-        public IActionResult GetAutors()
+        public ActionResult<IEnumerable<AuthorDto>> GetAutors()
         {
             var authorsFromRepo = this.courseLibraryRepository.GetAuthors();
-            return Ok(authorsFromRepo);
+
+
+            //No need to do it this way, mapped in the AuthorProfiles and automapper handle it
+            //var authors = new List<AuthorDto>();
+            //foreach (var author in authorsFromRepo)
+            //{
+            //    authors.Add(new AuthorDto() { 
+            //        Id = author.Id,
+            //        Name = $"{author.FirstName} {author.LastName}",
+            //        MainCategory = author.MainCategory,
+            //        Age = author.DateOfBirth.GetCurrentAge()
+            //    });
+            //}
+
+            return Ok(this.mapper.Map<IEnumerable<AuthorDto>>(authorsFromRepo));
         }
 
         /// <summary>
@@ -37,7 +57,7 @@ namespace CourseLibrary.API.Controllers
         /// <param name="authorId">Author Guid ID</param>
         /// <returns>Author in Accept header format</returns>
         [HttpGet("{authorId:guid}")]//{ is the dynamic tag, name in the tag is var name, : is var strong typing
-        public IActionResult GetAuthor(Guid authorId)//call var name in the tag, must be exact match
+        public ActionResult<AuthorDto> GetAuthor(Guid authorId)//call var name in the tag, must be exact match
         {
             //Check for author, bad because API can get interrupted and cause bad return
             //if (!this.courseLibraryRepository.AuthorExists(authorId))
@@ -51,7 +71,7 @@ namespace CourseLibrary.API.Controllers
                 return NotFound();
 
             //return author
-            return Ok(authorFromRepo);
+            return Ok(this.mapper.Map<IEnumerable<AuthorDto>>(authorFromRepo));
 
         }
     }
