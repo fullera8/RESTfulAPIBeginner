@@ -46,7 +46,7 @@ namespace CourseLibrary.API.Controllers
         /// <param name="courseId">Course ID Guid</param>
         /// <returns>Course details</returns>
         [HttpGet("{courseId:guid}")]
-        public ActionResult<IEnumerable<CourseDto>> GetCourseForAuthor(Guid authorId, Guid courseId)
+        public ActionResult<CourseDto> GetCourseForAuthor(Guid authorId, Guid courseId)
         {
             //Course validation
             //check for author
@@ -58,7 +58,7 @@ namespace CourseLibrary.API.Controllers
                 return NotFound();
 
             //Return course details
-            return Ok(this.mapper.Map<IEnumerable<CourseDto>>(courseForAuthorFromRepo));
+            return Ok(this.mapper.Map<CourseDto>(courseForAuthorFromRepo));
         }
     }
 }

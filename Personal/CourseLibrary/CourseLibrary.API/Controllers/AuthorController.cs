@@ -31,8 +31,12 @@ namespace CourseLibrary.API.Controllers
         /// </summary>
         /// <returns>Complete author list in Accept header format</returns>
         [HttpGet()]
+        [HttpHead]
         public ActionResult<IEnumerable<AuthorDto>> GetAutors()
         {
+            //Testing error return
+            //throw new Exception("Test Exception");
+            
             var authorsFromRepo = this.courseLibraryRepository.GetAuthors();
 
 

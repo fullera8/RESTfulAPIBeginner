@@ -40,11 +40,23 @@ namespace CourseLibrary.API
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
+        //In a non-dev environment, we override the null return with a custom message.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
+            }
+            else
+            {
+                app.UseExceptionHandler(appBuilder =>
+                {
+                    appBuilder.Run(async context =>
+                    {
+                        context.Response.StatusCode = 500;
+                        await context.Response.WriteAsync("An error occured, please contact application support.");
+                    });
+                });
             }
 
             app.UseRouting(); //Allows use of URI navigation, essential for most web apps
