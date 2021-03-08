@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using CourseLibrary.API.Helpers;
 using CourseLibrary.API.Models;
+using CourseLibrary.API.ResourceParameters;
 using CourseLibrary.API.Services;
 using Microsoft.AspNetCore.Mvc;
 using System;
@@ -27,17 +28,21 @@ namespace CourseLibrary.API.Controllers
         }
 
         /// <summary>
-        /// Get all authors
+        /// Get all authors for a category
         /// </summary>
+        /// <param name="mainCategory">Category filter</param>
+        /// <param name="searchQuery">Generic search criteria</param>
         /// <returns>Complete author list in Accept header format</returns>
         [HttpGet()]
         [HttpHead]
-        public ActionResult<IEnumerable<AuthorDto>> GetAutors()
+        public ActionResult<IEnumerable<AuthorDto>> GetAutors(
+            [FromQuery] AuthorsResourceParameters authorsResourceParameters //author params
+        )
         {
             //Testing error return
             //throw new Exception("Test Exception");
-            
-            var authorsFromRepo = this.courseLibraryRepository.GetAuthors();
+
+            var authorsFromRepo = this.courseLibraryRepository.GetAuthors(authorsResourceParameters);
 
 
             //No need to do it this way, mapped in the AuthorProfiles and automapper handle it

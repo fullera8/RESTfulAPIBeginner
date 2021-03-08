@@ -1,5 +1,6 @@
 ﻿using CourseLibrary.API.DbContexts;
-using CourseLibrary.API.Entities; 
+using CourseLibrary.API.Entities;
+using CourseLibrary.API.ResourceParameters;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -117,11 +118,64 @@ namespace CourseLibrary.API.Services
             return _context.Authors.FirstOrDefault(a => a.Id == authorId);
         }
 
+        /// <summary>
+        /// Get all authors in the database
+        /// </summary>
+        /// <returns>A list of all authors</returns>
         public IEnumerable<Author> GetAuthors()
         {
             return _context.Authors.ToList<Author>();
         }
-         
+
+        /// <summary>
+        /// Implimentation? Get a list of authors for a given category filter and/or search based on query criteria
+        /// </summary>
+        /// <param name="authorsResourceParameters">Variable list of author parameters</param>
+        /// <returns>A list of authors in a given category</returns>
+        public IEnumerable<Author> GetAuthors(AuthorsResourceParameters authorsResourceParameters)
+        {
+            //Check to see if value is null
+            if (authorsResourceParameters == null)
+                throw new ArgumentNullException(nameof(authorsResourceParameters));           
+
+            //If everything is blank/not provided, return base
+            if (string.IsNullOrWhiteSpace(authorsResourceParameters.MainCategory) && string.IsNullOrWhiteSpace(authorsResourceParameters.SearchQuery))
+                return GetAuthors();
+
+            /*IMPORTANT:
+             * Notice we make it queryable for multiple criteria.
+             * This is deferred execution and is most efficent method of querying data available.
+             * This builds the query in memory based on the criteria provided and only executes a get on iteration.
+             * Iteration meaning foreach, ToList, ToArray, ToDictionary, or with singletons
+            */
+            var collection = _context.Authors as IQueryable<Author>;
+
+            //filter the category
+            if (!string.IsNullOrWhiteSpace(authorsResourceParameters.MainCategory))
+            {
+                var mainCategory = authorsResourceParameters.MainCategory.Trim();
+                collection = collection.Where(author => author.MainCategory == mainCategory);
+            }
+
+            //search for the collection
+            if (!string.IsNullOrWhiteSpace(authorsResourceParameters.SearchQuery))
+            {
+                var searchQuery = authorsResourceParameters.SearchQuery.Trim();
+                collection = collection.Where(author =>
+                    author.MainCategory.Contains(searchQuery) ||
+                    author.FirstName.Contains(searchQuery) ||
+                    author.LastName.Contains(searchQuery)
+                );
+            }
+            
+            return collection.ToList<Author>();
+        }
+
+        /// <summary>
+        /// Find all authors given a list of potential author GUIDS
+        /// </summary>
+        /// <param name="authorIds">List of author GUIDS</param>
+        /// <returns>Sorted list of authors by first and last name</returns>
         public IEnumerable<Author> GetAuthors(IEnumerable<Guid> authorIds)
         {
             if (authorIds == null)
