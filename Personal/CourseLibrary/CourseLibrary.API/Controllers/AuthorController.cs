@@ -61,11 +61,11 @@ namespace CourseLibrary.API.Controllers
         }
 
         /// <summary>
-        /// Get single auto
+        /// Get single author. Name value used for reference to this call in other API calls
         /// </summary>
         /// <param name="authorId">Author Guid ID</param>
         /// <returns>Author in Accept header format</returns>
-        [HttpGet("{authorId:guid}")]//{ is the dynamic tag, name in the tag is var name, : is var strong typing
+        [HttpGet("{authorId:guid}", Name = "GetAuthor")]//{ is the dynamic tag, name in the tag is var name, : is var strong typing
         public ActionResult<AuthorDto> GetAuthor(Guid authorId)//call var name in the tag, must be exact match
         {
             //Check for author, bad because API can get interrupted and cause bad return
@@ -80,8 +80,26 @@ namespace CourseLibrary.API.Controllers
                 return NotFound();
 
             //return author
-            return Ok(this.mapper.Map<IEnumerable<AuthorDto>>(authorFromRepo));
+            return Ok(this.mapper.Map<AuthorDto>(authorFromRepo));
 
+        }
+
+        [HttpPost]
+        public ActionResult<AuthorDto> CreateAuthor([FromBody] AuthorsForCreationDto author) {
+            //map author
+            var authorEntity = this.mapper.Map<Entities.Author>(author);
+            
+            //create author, DB is black box logic
+            this.courseLibraryRepository.AddAuthor(authorEntity);
+            this.courseLibraryRepository.Save();
+
+            //return new author detail
+            var authorReturn = this.mapper.Map<Models.AuthorDto>(authorEntity);
+            return CreatedAtRoute(
+                "GetAuthor",
+                new { authorId = authorReturn.Id },
+                authorReturn
+                );
         }
     }
 }

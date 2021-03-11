@@ -28,6 +28,8 @@ namespace CourseLibrary.API.Controllers.Profiles
                     opt => opt.MapFrom(src => src.DateOfBirth.GetCurrentAge())
                 );
 
+            //Mapping for PUT requests
+            CreateMap<Models.AuthorsForCreationDto, Entities.Author>();
         }
     }
 }
