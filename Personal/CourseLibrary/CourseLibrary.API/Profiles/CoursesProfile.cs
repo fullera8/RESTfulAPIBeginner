@@ -13,6 +13,9 @@ namespace CourseLibrary.API.Profiles
         {
             //No special mapping required, this is enough of a base statement
             CreateMap<Entities.Course, Models.CourseDto>();
+
+            //Create map for post method
+            CreateMap<Models.CoursesForCreationDto, Entities.Course>();
         }
     }
 }

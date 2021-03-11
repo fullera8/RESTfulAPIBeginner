@@ -45,7 +45,7 @@ namespace CourseLibrary.API.Controllers
         /// <param name="authorId">Author ID Guid</param>
         /// <param name="courseId">Course ID Guid</param>
         /// <returns>Course details</returns>
-        [HttpGet("{courseId:guid}")]
+        [HttpGet("{courseId:guid}", Name = "GetCourseForAuthor")]
         public ActionResult<CourseDto> GetCourseForAuthor(Guid authorId, Guid courseId)
         {
             //Course validation
@@ -59,6 +59,33 @@ namespace CourseLibrary.API.Controllers
 
             //Return course details
             return Ok(this.mapper.Map<CourseDto>(courseForAuthorFromRepo));
+        }
+
+        
+        [HttpPost]
+        public ActionResult<CourseDto> CreateCourseForAuthor( 
+            Guid authorId, 
+            CoursesForCreationDto course)
+        {
+            //author validation required
+            if (!this.courseLibraryRepository.AuthorExists(authorId))
+                return NotFound();
+
+            //map to entities
+            var courseEntity = this.mapper.Map<Entities.Course>(course);
+            this.courseLibraryRepository.AddCourse(authorId, courseEntity);
+
+            //Add Course
+            this.courseLibraryRepository.AddCourse(authorId, courseEntity);
+            this.courseLibraryRepository.Save();
+
+            //Return saved output
+            var courseReturn = this.mapper.Map<CourseDto>(courseEntity);
+            return CreatedAtRoute(
+                "GetCourseForAuthor",
+                new { authorId = courseReturn.AuthorId, courseId = courseReturn.Id },
+                courseReturn
+                );
         }
     }
 }

@@ -85,16 +85,17 @@ namespace CourseLibrary.API.Controllers
         }
 
         [HttpPost]
-        public ActionResult<AuthorDto> CreateAuthor([FromBody] AuthorsForCreationDto author) {
+        public ActionResult<AuthorDto> CreateAuthor([FromBody] AuthorsForCreationDto author)
+        {
             //map author
             var authorEntity = this.mapper.Map<Entities.Author>(author);
-            
+
             //create author, DB is black box logic
             this.courseLibraryRepository.AddAuthor(authorEntity);
             this.courseLibraryRepository.Save();
 
             //return new author detail
-            var authorReturn = this.mapper.Map<Models.AuthorDto>(authorEntity);
+            var authorReturn = this.mapper.Map<AuthorDto>(authorEntity);
             return CreatedAtRoute(
                 "GetAuthor",
                 new { authorId = authorReturn.Id },
