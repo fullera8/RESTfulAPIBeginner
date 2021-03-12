@@ -102,5 +102,16 @@ namespace CourseLibrary.API.Controllers
                 authorReturn
                 );
         }
+
+        /// <summary>
+        /// Allows user to view what response headers are allowed in the allow header return
+        /// </summary>
+        /// <returns>List of allowed response headers</returns>
+        [HttpOptions]
+        public IActionResult GetAuthorsOptions()
+        {
+            Response.Headers.Add("Allow", "GET,OPTIONS,POST");
+            return Ok();
+        }
     }
 }
