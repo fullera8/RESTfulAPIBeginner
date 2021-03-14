@@ -117,7 +117,7 @@ namespace CourseLibrary.API.Controllers
         /// <summary>
         /// Delete the author from the repo
         /// </summary>
-        /// <param name="authorID">author guid</param>
+        /// <param name="authorId">author guid</param>
         /// <returns>204 No Content, meaning delete was successful</returns>
         [HttpDelete("{authorId}")]
         public ActionResult DeleteAuthor(Guid authorId)
