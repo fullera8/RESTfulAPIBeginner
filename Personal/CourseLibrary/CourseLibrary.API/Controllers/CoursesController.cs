@@ -95,14 +95,32 @@ namespace CourseLibrary.API.Controllers
         /// <param name="courseId">Course GUID</param>
         /// <returns>Returns no content.</returns>
         [HttpPut("{courseId}")]
-        public ActionResult UpdateCourseForAuthor(Guid authorId, Guid courseId, CourseForUpdateDto courseForUpdateDto)
+        public IActionResult UpdateCourseForAuthor(Guid authorId, Guid courseId, CourseForUpdateDto courseForUpdateDto)
         {
             //user input validation
             if (!this.courseLibraryRepository.AuthorExists(authorId))
                 return NotFound();
             var courseForAuthorEntity = this.courseLibraryRepository.GetCourse(authorId, courseId);
+
+            //If course does not exist, create it
             if (courseForAuthorEntity == null)
-                return NotFound();
+            {
+               //map to entity and set the ID
+                var courseAdd = this.mapper.Map<Entities.Course>(courseForUpdateDto);
+                courseAdd.Id = courseId;
+
+                //Add course
+                this.courseLibraryRepository.AddCourse(authorId, courseAdd);
+                this.courseLibraryRepository.Save();
+
+                //Return saved output
+                var courseReturn = this.mapper.Map<CourseDto>(courseAdd);
+                return CreatedAtRoute(
+                    "GetCourseForAuthor",
+                    new { authorId, courseId = courseReturn.Id }, //notice because of the same authorId name and order, no mapping required
+                    courseReturn
+                );
+            }
 
             //map to the entity, this is another way to update the existing var without creating a new var
             this.mapper.Map(courseForUpdateDto, courseForAuthorEntity);
