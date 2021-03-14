@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using CourseLibrary.API.Models;
 using CourseLibrary.API.Services;
+using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
@@ -130,6 +131,36 @@ namespace CourseLibrary.API.Controllers
             this.courseLibraryRepository.Save();
 
             //return no content, standard for an httpput
+            return NoContent();
+        }
+
+        [HttpPatch("{courseId}")]
+        public ActionResult PartiallyUpdateCourseForAuthor(
+            Guid authorId, 
+            Guid courseId, 
+            JsonPatchDocument<CourseForUpdateDto> patchDocument)
+        {
+            //Validate course for author exists
+            if (!this.courseLibraryRepository.AuthorExists(authorId))
+                return NotFound();
+            var courseForAuthorEntity = this.courseLibraryRepository.GetCourse(authorId, courseId);
+            if(courseForAuthorEntity == null)
+                return NotFound();
+
+            // Map the requested resource to an update entity. 
+            // Requires a map from entity to dto for the patch applyto method
+            var courseToPatch = this.mapper.Map<CourseForUpdateDto>(courseForAuthorEntity);
+            // TO DO: Add patch validation
+            patchDocument.ApplyTo(courseToPatch);
+
+            // Map the update back to entity
+            this.mapper.Map(courseToPatch, courseForAuthorEntity);
+
+            // Update and save the course
+            this.courseLibraryRepository.UpdateCourse(courseForAuthorEntity);
+            this.courseLibraryRepository.Save();
+
+            //Return no content because update
             return NoContent();
         }
     }

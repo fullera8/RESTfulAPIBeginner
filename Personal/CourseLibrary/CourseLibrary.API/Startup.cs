@@ -9,6 +9,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Newtonsoft.Json.Serialization;
 using System; //AutoMapper in the Demo
 
 namespace CourseLibrary.API
@@ -29,6 +30,11 @@ namespace CourseLibrary.API
             {
                 setupAction.ReturnHttpNotAcceptable = true; //Determine that accept header must be explicitly defined
            })
+            .AddNewtonsoftJson(setupAction =>
+            {
+                setupAction.SerializerSettings.ContractResolver =
+                    new CamelCasePropertyNamesContractResolver();
+            })
             .AddXmlDataContractSerializerFormatters()// Allows for xml return type, JSON return by default
             .ConfigureApiBehaviorOptions(setupAction =>
             {

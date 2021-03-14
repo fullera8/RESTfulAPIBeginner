@@ -19,6 +19,9 @@ namespace CourseLibrary.API.Profiles
 
             //create map for the put(update) method
             CreateMap<Models.CourseForUpdateDto, Entities.Course>();
+
+            //create map for the patch(update) method
+            CreateMap<Entities.Course, Models.CourseForUpdateDto>();
         }
     }
 }
