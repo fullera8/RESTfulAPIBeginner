@@ -87,5 +87,32 @@ namespace CourseLibrary.API.Controllers
                 courseReturn
                 );
         }
+
+        /// <summary>
+        /// Updates an author's course
+        /// </summary>
+        /// <param name="authorId">Author GUID</param>
+        /// <param name="courseId">Course GUID</param>
+        /// <returns>Returns no content.</returns>
+        [HttpPut("{courseId}")]
+        public ActionResult UpdateCourseForAuthor(Guid authorId, Guid courseId, CourseForUpdateDto courseForUpdateDto)
+        {
+            //user input validation
+            if (!this.courseLibraryRepository.AuthorExists(authorId))
+                return NotFound();
+            var courseForAuthorEntity = this.courseLibraryRepository.GetCourse(authorId, courseId);
+            if (courseForAuthorEntity == null)
+                return NotFound();
+
+            //map to the entity, this is another way to update the existing var without creating a new var
+            this.mapper.Map(courseForUpdateDto, courseForAuthorEntity);
+
+            //apply the update
+            this.courseLibraryRepository.UpdateCourse(courseForAuthorEntity);
+            this.courseLibraryRepository.Save();
+
+            //return no content, standard for an httpput
+            return NoContent();
+        }
     }
 }

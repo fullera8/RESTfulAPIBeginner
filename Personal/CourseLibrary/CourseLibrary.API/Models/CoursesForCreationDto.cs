@@ -8,17 +8,8 @@ using System.Threading.Tasks;
 
 namespace CourseLibrary.API.Models
 {
-    [CourseDescriptionMustBeDifferentFromTitleAttribute(ErrorMessage = "Course title cannot match description.")]
-    public class CoursesForCreationDto
-    {
-        [Required(ErrorMessage = "Course title is required.")]
-        [MaxLength(100, ErrorMessage = "Course title cannot be greater than 100 chars.")]
-        public string Title { get; set; }
-
-        [MaxLength(1500, ErrorMessage = "Course description cannot be greater than 1,500 chars.")]
-        public string Description { get; set; }
-
-        
+    public class CoursesForCreationDto : CourseForManipulationDto
+    {        
         //Happens in seperate class
         //public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
         //{
