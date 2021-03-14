@@ -66,10 +66,15 @@ namespace CourseLibrary.API.Controllers
             return Ok(this.mapper.Map<CourseDto>(courseForAuthorFromRepo));
         }
 
-        
+        /// <summary>
+        /// Creates a course for an existing author
+        /// </summary>
+        /// <param name="authorId">author guid</param>
+        /// <param name="course">course guid</param>
+        /// <returns>Course details</returns>
         [HttpPost]
-        public ActionResult<CourseDto> CreateCourseForAuthor( 
-            Guid authorId, 
+        public ActionResult<CourseDto> CreateCourseForAuthor(
+            Guid authorId,
             CoursesForCreationDto course)
         {
             //author validation required
@@ -110,7 +115,7 @@ namespace CourseLibrary.API.Controllers
             //If course does not exist, create it
             if (courseForAuthorEntity == null)
             {
-               //map to entity and set the ID
+                //map to entity and set the ID
                 var courseAdd = this.mapper.Map<Entities.Course>(courseForUpdateDto);
                 courseAdd.Id = courseId;
 
@@ -138,23 +143,30 @@ namespace CourseLibrary.API.Controllers
             return NoContent();
         }
 
+        /// <summary>
+        /// Update partial course details, does not default any details not provided
+        /// </summary>
+        /// <param name="authorId">author guid</param>
+        /// <param name="courseId">course guid</param>
+        /// <param name="patchDocument">parameters to updaed in JSON format</param>
+        /// <returns>204 no content, meaning the update was successful</returns>
         [HttpPatch("{courseId}")]
         public ActionResult PartiallyUpdateCourseForAuthor(
-            Guid authorId, 
-            Guid courseId, 
+            Guid authorId,
+            Guid courseId,
             JsonPatchDocument<CourseForUpdateDto> patchDocument)
         {
             //Validate course for author exists
             if (!this.courseLibraryRepository.AuthorExists(authorId))
                 return NotFound();
             var courseForAuthorEntity = this.courseLibraryRepository.GetCourse(authorId, courseId);
-            if(courseForAuthorEntity == null)
+            if (courseForAuthorEntity == null)
                 return NotFound();
 
             // Map the requested resource to an update entity. 
             // Requires a map from entity to dto for the patch applyto method
             var courseToPatch = this.mapper.Map<CourseForUpdateDto>(courseForAuthorEntity);
-            
+
             // For patch you must apply the model then validate, class validation does not work for patch
             patchDocument.ApplyTo(courseToPatch, ModelState);
             if (!TryValidateModel(courseToPatch))
@@ -171,7 +183,35 @@ namespace CourseLibrary.API.Controllers
             return NoContent();
         }
 
-        //Needed to return custom vlidation responses for patch
+        /// <summary>
+        /// Deletes the course for a given author
+        /// </summary>
+        /// <param name="authorId">author guid</param>
+        /// <param name="courseId">course guid</param>
+        /// <returns>204 no content, meaning successful delete</returns>
+        [HttpDelete("{courseId}")]
+        public ActionResult DeleteCourseForAuthor(Guid authorId, Guid courseId)
+        {
+            //Course validation
+            if (!this.courseLibraryRepository.AuthorExists(authorId))
+                return NotFound();
+            var courseForAuthor = this.courseLibraryRepository.GetCourse(authorId, courseId);
+            if (courseForAuthor == null)
+                return NotFound();
+
+            //Delete and save
+            this.courseLibraryRepository.DeleteCourse(courseForAuthor);
+            this.courseLibraryRepository.Save();
+
+            //return complete
+            return NoContent();
+        }
+
+        /// <summary>
+        /// Overrides validation responses for put requests
+        /// </summary>
+        /// <param name="modelStateDictionary">Details for the model to pass to the response</param>
+        /// <returns>model validation error details</returns>
         public override ActionResult ValidationProblem([ActionResultObjectValue] ModelStateDictionary modelStateDictionary)
         {
             var options = HttpContext.RequestServices.GetRequiredService<IOptions<ApiBehaviorOptions>>();
