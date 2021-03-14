@@ -3,6 +3,10 @@ using CourseLibrary.API.Models;
 using CourseLibrary.API.Services;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Infrastructure;
+using Microsoft.AspNetCore.Mvc.ModelBinding;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -150,10 +154,13 @@ namespace CourseLibrary.API.Controllers
             // Map the requested resource to an update entity. 
             // Requires a map from entity to dto for the patch applyto method
             var courseToPatch = this.mapper.Map<CourseForUpdateDto>(courseForAuthorEntity);
-            // TO DO: Add patch validation
-            patchDocument.ApplyTo(courseToPatch);
+            
+            // For patch you must apply the model then validate, class validation does not work for patch
+            patchDocument.ApplyTo(courseToPatch, ModelState);
+            if (!TryValidateModel(courseToPatch))
+                return ValidationProblem(ModelState);
 
-            // Map the update back to entity
+            // Map the model back to entity (post validation)
             this.mapper.Map(courseToPatch, courseForAuthorEntity);
 
             // Update and save the course
@@ -162,6 +169,13 @@ namespace CourseLibrary.API.Controllers
 
             //Return no content because update
             return NoContent();
+        }
+
+        //Needed to return custom vlidation responses for patch
+        public override ActionResult ValidationProblem([ActionResultObjectValue] ModelStateDictionary modelStateDictionary)
+        {
+            var options = HttpContext.RequestServices.GetRequiredService<IOptions<ApiBehaviorOptions>>();
+            return (ActionResult)options.Value.InvalidModelStateResponseFactory(ControllerContext);
         }
     }
 }
